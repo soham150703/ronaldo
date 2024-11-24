@@ -1,7 +1,10 @@
+%Facts
 food(apple).
 food(vegetables).
 eats(anil, peanuts).
 alive(anil).
+
+%Rules
 food(Y) :- eats(X, Y), \+killed(X).
 alive(X) :- \+killed(X).
 killed(X) :- \+alive(X).
