@@ -1,116 +1,113 @@
 #include <stdio.h>
 #include <limits.h>
-#include <stdbool.h>
+#define MAX 10
 
-#define MAX 100
+int graph[MAX][MAX];       
+int heuristic[MAX];         
+int visited[MAX];           
+int priorityQueue[MAX];     
+int priority[MAX];          
+int front = -1, rear = -1;  
 
+// Enqueue operation for the priority queue
+void enqueue(int node, int hValue) {
+    if (rear == MAX - 1) {
+        printf("Priority Queue is full!\n");
+        return;
+    }
+    if (front == -1) front = 0;
+    rear++;
 
-struct item {
-    int node;
-    int priority;  
-};
+    priorityQueue[rear] = node;
+    priority[rear] = hValue;
 
+    // Sort the queue based on heuristic values (ascending order)
+    for (int i = rear; i > front; i--) {
+        if (priority[i] < priority[i - 1]) {
+            // Swap elements in priorityQueue
+            int tempNode = priorityQueue[i];
+            priorityQueue[i] = priorityQueue[i - 1];
+            priorityQueue[i - 1] = tempNode;
 
-struct item pr[MAX];
-int size = -1;
-
-
-int graph[MAX][MAX];
-int n; 
-
-
-void enqueue(int node, int priority) {
-    size++;
-    pr[size].node = node;
-    pr[size].priority = priority;
-}
-
-
-int peek() {
-    int lowestPriority = INT_MAX;
-    int ind = -1;
-
-    for (int i = 0; i <= size; i++) {
-        if (pr[i].priority < lowestPriority) {
-            lowestPriority = pr[i].priority;
-            ind = i;
+            // Swap corresponding heuristic values
+            int tempPriority = priority[i];
+            priority[i] = priority[i - 1];
+            priority[i - 1] = tempPriority;
         }
     }
-    return ind;
 }
 
-
+// Dequeue operation for the priority queue
 int dequeue() {
-    int ind = peek();
-    int node = pr[ind].node;
-
-    
-    for (int i = ind; i < size; i++) {
-        pr[i] = pr[i + 1];
+    if (front == -1 || front > rear) {
+        printf("Priority Queue is empty!\n");
+        return -1;
     }
-    size--;
+    int node = priorityQueue[front];
+    front++;
     return node;
 }
 
-void bestFirstSearch(int start, int goal, int heuristic[]) {
-    bool visited[MAX] = { false };  
-    enqueue(start, heuristic[start]);  
-    visited[start] = true;
+// Check if the priority queue is empty
+int isEmpty() {
+    return front == -1 || front > rear;
+}
 
-    printf("Best First Search Path: ");
-    while (size != -1) {
-        int current = dequeue();  
-        printf("%d ", current); 
+// Greedy Best-First Search Algorithm
+void greedyBestFirstSearch(int start, int goal, int numVertices) {
+    enqueue(start, heuristic[start]);
+    visited[start] = 1;
 
-        
+    printf("Path: ");
+    while (!isEmpty()) {
+        int current = dequeue();
+        printf("%d ", current);
+
         if (current == goal) {
-            printf("\nGoal Node %d found!\n", goal);
+            printf("\nGoal %d reached!\n", goal);
             return;
         }
 
-        
-        for (int i = 0; i < n; i++) {
-            if (graph[current][i] != 0 && !visited[i]) {  
-                enqueue(i, heuristic[i]);  
-                visited[i] = true;  
+        for (int i = 0; i < numVertices; i++) {
+            if (graph[current][i] == 1 && !visited[i]) { // Adjacent and unvisited
+                enqueue(i, heuristic[i]);
+                visited[i] = 1;
             }
         }
     }
-    printf("\nGoal Node %d not reachable!\n", goal);  
+    printf("\nGoal not reachable!\n");
 }
 
-
+// Main function
 int main() {
-    int startNode, goalNode;
+    int numVertices, start, goal;
 
-    
-    printf("Enter the number of nodes in the graph: ");
-    scanf("%d", &n);
+    printf("Enter the number of vertices: ");
+    scanf("%d", &numVertices);
 
-    
-    printf("Enter the adjacency matrix (0 for no edge, 1 for edge):\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+    // Input adjacency matrix
+    printf("Enter the adjacency matrix:\n");
+    for (int i = 0; i < numVertices; i++) {
+        for (int j = 0; j < numVertices; j++) {
             scanf("%d", &graph[i][j]);
         }
     }
 
-
-    int heuristic[MAX];
-    printf("Enter the heuristic values for each node:\n");
-    for (int i = 0; i < n; i++) {
-        printf("Heuristic for node %d: ", i);
+    // Input heuristic values
+    printf("Enter the heuristic values for each vertex:\n");
+    for (int i = 0; i < numVertices; i++) {
         scanf("%d", &heuristic[i]);
+        visited[i] = 0; // Initialize visited array
     }
 
-    
-    printf("Enter the start node: ");
-    scanf("%d", &startNode);
-    printf("Enter the goal node: ");
-    scanf("%d", &goalNode);
+    // Input start and goal nodes
+    printf("Enter the start vertex: ");
+    scanf("%d", &start);
+    printf("Enter the goal vertex: ");
+    scanf("%d", &goal);
 
-    
-    bestFirstSearch(startNode, goalNode, heuristic);
+    // Perform Greedy Best-First Search
+    greedyBestFirstSearch(start, goal, numVertices);
 
     return 0;
 }
