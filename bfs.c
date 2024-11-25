@@ -30,7 +30,7 @@ int dequeue() {
     }
 }
 
-void bfs(int startVertex, int n) {
+void bfs(int startVertex, int destinationVertex, int n) {
     int i;
     
     enqueue(startVertex);
@@ -39,6 +39,12 @@ void bfs(int startVertex, int n) {
     while (front <= rear) {
         int currentVertex = dequeue();
         printf("%d ", currentVertex);
+
+        // Check if the destination is reached
+        if (currentVertex == destinationVertex) {
+            printf("\nDestination %d reached. Stopping BFS.\n", destinationVertex);
+            return;
+        }
 
         for (i = 0; i < n; i++) {
             if (adjMatrix[currentVertex][i] == 1 && !visited[i]) {
@@ -50,37 +56,28 @@ void bfs(int startVertex, int n) {
 }
 
 int main() {
-    int n, i, j, edges, vertex1, vertex2, startVertex;
+    int n, i, j, startVertex, destinationVertex;
 
     printf("Enter the number of vertices: ");
     scanf("%d", &n);
 
-    // Initialize adjacency matrix and visited array
+    // Input adjacency matrix
+    printf("Enter the adjacency matrix (0 or 1):\n");
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-            adjMatrix[i][j] = 0;
+            scanf("%d", &adjMatrix[i][j]);
         }
-        visited[i] = 0;
+        visited[i] = 0;  // Initialize visited array to 0
     }
 
-    printf("Enter the number of edges: ");
-    scanf("%d", &edges);
-
-    // Accept edges from the user
-    for (i = 0; i < edges; i++) {
-        printf("Enter edge (two vertices between 0 and %d): ", n-1);
-        scanf("%d %d", &vertex1, &vertex2);
-        
-        // Mark the edge in the adjacency matrix (undirected graph)
-        adjMatrix[vertex1][vertex2] = 1;
-        adjMatrix[vertex2][vertex1] = 1;
-    }
-
-    printf("Enter the starting vertex (0 to %d): ", n-1);
+    printf("Enter the starting vertex (0 to %d): ", n - 1);
     scanf("%d", &startVertex);
 
+    printf("Enter the destination vertex (0 to %d): ", n - 1);
+    scanf("%d", &destinationVertex);
+
     printf("BFS traversal starting from vertex %d:\n", startVertex);
-    bfs(startVertex, n);
+    bfs(startVertex, destinationVertex, n);
 
     return 0;
 }
