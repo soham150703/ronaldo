@@ -1,31 +1,40 @@
-% Define diseases based on symptoms
-disease(malaria) :- symptom(fever), symptom(headache), symptom(nausea).
-disease(covid) :- symptom(fever), symptom(cough), symptom(fatigue).
+% Facts: Symptoms associated with specific diseases
+symptom(fever, malaria).
+symptom(headache, malaria).
+symptom(chills, malaria).
+symptom(sore_throat, common_cold).
+symptom(runny_nose, common_cold).
+symptom(cough, common_cold).
+symptom(chest_pain, pneumonia).
+symptom(shortness_of_breath, pneumonia).
+symptom(fatigue, anemia).
 
-% Predicate to ask yes/no questions about symptoms
-ask_symptom(Symptom) :-
-    format('Do you have ~w? (yes/no) ', [Symptom]),
-    read(Response),
-    (Response == yes -> assert(symptom(Symptom));
-    Response == no -> true;
-    write('Please answer yes or no.'), nl, ask_symptom(Symptom)).
+% Rules: Disease diagnosis based on symptoms
+diagnosis(Disease) :- 
+    symptom(S1, Disease), 
+    ask(S1),
+    symptom(S2, Disease), 
+    ask(S2).
 
-% Collect symptoms based on user responses
-get_symptoms :-
-    ask_symptom(fever),
-    ask_symptom(cough),
-    ask_symptom(headache),
-    ask_symptom(nausea),
-    ask_symptom(fatigue).
+diagnosis(Disease) :- 
+    symptom(S1, Disease), 
+    ask(S1).
 
-% Predicate to predict disease based on symptoms
-predict_disease :-
-    findall(Disease, disease(Disease), Diseases),
-    (member(malaria, Diseases) -> write('Possible disease: Malaria'), nl
-    ; member(covid, Diseases) -> write('Possible disease: COVID-19'), nl
-    ; write('No matching disease found for the provided symptoms.'), nl).
+% User interaction to check symptoms
+ask(Symptom) :- 
+    format("Do you have ~w? (yes/no): ", [Symptom]),
+    read(Reply),
+    Reply = yes.
 
-% To start the prediction
-start :-
-    get_symptoms,
-    predict_disease.
+% Fallback if no disease is diagnosed
+diagnosis(unknown) :- 
+    write("No diagnosis could be made based on the given symptoms."), nl.
+
+% Main predicate to start the system
+start :- 
+    write("Welcome to the Medical Diagnosis Expert System!"), nl,
+    write("Please answer the following questions:"), nl,
+    diagnosis(Disease),
+    (Disease \= unknown -> 
+        format("You may have: ~w", [Disease]), nl; 
+        true).
